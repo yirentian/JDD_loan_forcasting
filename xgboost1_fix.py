@@ -1,6 +1,7 @@
 # coding=utf-8
 import pandas as pd
 import xgboost as xgb
+import time
 from sklearn import metrics
 import pickle
 import warnings
@@ -34,25 +35,22 @@ dtest=xgb.DMatrix(test_data)
 kf = KFold(n_splits=5, random_state=2017, shuffle=True)
 rmse_list = []
 sub_pred = []
-
+start = time.time()
 for train_index, val_index in kf.split(training):
     X_train, y_train, X_val, y_val = training[train_index], label[train_index], training[val_index], label[val_index]
 
     params = {
-        'booster': 'gbtree',  # gbtree used
-        #'objective': 'binary:logistic',
+        'booster': 'gbtree',
         'objective': 'reg:linear',
-        'early_stopping_rounds': 50,
-        'scale_pos_weight': 0.63,  # 正样本权重
-        'gamma': 0,
-        'max_depth': 5,
-        'subsample': 0.6,
-        'colsample_bytree': 0.6,
-        'min_child_weight': 1,
-        'eta': 0.02,
-        'seed': 10,
-        'nthread': 1,
-        'silent': 1
+        'eval_metric': 'rmse',
+        'eta': 0.08,
+        'num_round': 500, #300
+        'max_depth': 3,
+        'nthread': -1,
+        'seed': 888,
+        'silent': 1,
+        'lambda':1500,
+        'min_child_weight': 4
     }
     dtrain = xgb.DMatrix(X_train, label=y_train)
     dval = xgb.DMatrix(X_val, label=y_val)
@@ -65,5 +63,8 @@ for train_index, val_index in kf.split(training):
     MSE = sum(abs(y_val - y_pred)) / len(y_val)
     print("rmse:", rmse)
     print("MSE:",MSE)
+    end = time.time()
+    print (end - start)
+
     rmse_list.append(rmse)
 
