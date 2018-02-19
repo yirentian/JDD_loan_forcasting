@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold,KFold
 from sklearn.metrics import mean_squared_error
 from sklearn import model_selection
-from tpot import TPOTClassifier
+from tpot import TPOTRegressor
 import numpy as np
 warnings.filterwarnings("ignore")
 
@@ -34,15 +34,19 @@ sub_df = test_data['uid'].copy()
 test_data = test_data.values
 dtest=xgb.DMatrix(test_data)
 
-kf = KFold(n_splits=5, random_state=2017, shuffle=True)
+kf = KFold(n_splits=2, random_state=2017, shuffle=True)
 rmse_list = []
 sub_pred = []
 
 for train_index, val_index in kf.split(training):
     X_train, y_train, X_val, y_val = training[train_index], label[train_index], training[val_index], label[val_index]
 
-    tpot = TPOTClassifier(generations=2,verbosity=2)
+    tpot = TPOTRegressor(generations=100, population_size=100, offspring_size=None,mutation_rate=0.9, crossover_rate=0.1,
+                 scoring=None, cv=5, n_jobs=1,
+                 max_time_mins=None, max_eval_time_mins=5,
+                 random_state=None, config_dict=None, warm_start=False,
+                 verbosity=0, disable_update_check=False)
     tpot.fit(X_train, y_train)
     tpot.score(X_val, y_val )
 
-    tpot.export('xgboost3.py')
+    tpot.export('tpot_exported_pipeline.py')
