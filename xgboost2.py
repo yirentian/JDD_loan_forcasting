@@ -1,6 +1,7 @@
 # coding=utf-8
 import pandas as pd
 import xgboost as xgb
+import time
 from sklearn import metrics
 import pickle
 import warnings
@@ -34,33 +35,20 @@ dtest=xgb.DMatrix(test_data)
 kf = KFold(n_splits=5, random_state=2017, shuffle=True)
 rmse_list = []
 sub_pred = []
-
+start = time.time()
 for train_index, val_index in kf.split(training):
     X_train, y_train, X_val, y_val = training[train_index], label[train_index], training[val_index], label[val_index]
 
-    params = {
-        'booster': 'gbtree',
-        'objective': 'reg:linear',
-        'eval_metric': 'rmse',
-        'eta': 0.08,
-        'num_round': 500, #300
-        'max_depth': 3,
-        'nthread': -1,
-        'seed': 888,
-        'silent': 1,
-        'lambda':1500,
-        'min_child_weight': 4
-    }
-    dtrain = xgb.DMatrix(X_train, label=y_train)
-    dval = xgb.DMatrix(X_val, label=y_val)
-    watchlist = [(dval, 'val_x'), (dtrain, 'train_x')]
-    model = xgb.train(params, dtrain, num_boost_round=50, evals=watchlist)
-
+    model= xgb.XGBRegressor(max_depth=5, n_estimators=500, learning_rate=0.05, silent=False,)
     # 对测试集进行预测（以上部分之所以划分成验证集，可以用来调参）
-    y_pred = model.predict(dval, ntree_limit=model.best_ntree_limit)
+    xgb=model.fit(X_train, y_train)
+    y_pred = xgb.predict(X_val, ntree_limit=model.best_ntree_limit)
     rmse = mean_squared_error(y_val, y_pred) ** 0.5
     MSE = sum(abs(y_val - y_pred)) / len(y_val)
     print("rmse:", rmse)
     print("MSE:",MSE)
+    end = time.time()
+    print (end - start)
+
     rmse_list.append(rmse)
 
