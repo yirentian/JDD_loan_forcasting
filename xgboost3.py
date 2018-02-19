@@ -7,6 +7,9 @@ import warnings
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold,KFold
 from sklearn.metrics import mean_squared_error
+from sklearn import model_selection
+from tpot import TPOTClassifier
+import numpy as np
 warnings.filterwarnings("ignore")
 
 
@@ -38,31 +41,8 @@ sub_pred = []
 for train_index, val_index in kf.split(training):
     X_train, y_train, X_val, y_val = training[train_index], label[train_index], training[val_index], label[val_index]
 
-    params = {
-        'booster': 'gbtree',  # gbtree used
-        'objective': 'binary:logistic',
-        'early_stopping_rounds': 50,
-        'scale_pos_weight': 0.63,  # 正样本权重
-        'eval_metric': 'auc',
-        'gamma': 0,
-        'max_depth': 5,
-        # 'lambda': 550,
-        'subsample': 0.6,
-        'colsample_bytree': 0.9,
-        'min_child_weight': 1,
-        'eta': 0.02,
-        'seed': 12,
-        'nthread': 3,
-        'silent': 1
-    }
-    dtrain = xgb.DMatrix(X_train, label=y_train)
-    dval = xgb.DMatrix(X_val, label=y_val)
-    watchlist = [(dval, 'val_x'), (dtrain, 'train_x')]
-    model = xgb.train(params, dtrain, num_boost_round=50, evals=watchlist)
+    tpot = TPOTClassifier(generations=2,verbosity=2)
+    tpot.fit(X_train, y_train)
+    tpot.score(X_val, y_val )
 
-    # 对测试集进行预测（以上部分之所以划分成验证集，可以用来调参）
-    y_pred = model.predict(dval, ntree_limit=model.best_ntree_limit)
-    rmse = mean_squared_error(y_val, y_pred) ** 0.5
-    print("rmse:", rmse)
-    rmse_list.append(rmse)
-
+    tpot.export('xgboost3.py')

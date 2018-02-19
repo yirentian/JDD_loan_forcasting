@@ -40,19 +40,18 @@ for train_index, val_index in kf.split(training):
 
     params = {
         'booster': 'gbtree',  # gbtree used
-        'objective': 'binary:logistic',
+        #'objective': 'binary:logistic',
+        'objective': 'reg:linear',
         'early_stopping_rounds': 50,
         'scale_pos_weight': 0.63,  # 正样本权重
-        'eval_metric': 'auc',
         'gamma': 0,
         'max_depth': 5,
-        # 'lambda': 550,
         'subsample': 0.6,
-        'colsample_bytree': 0.9,
+        'colsample_bytree': 0.6,
         'min_child_weight': 1,
         'eta': 0.02,
-        'seed': 12,
-        'nthread': 3,
+        'seed': 10,
+        'nthread': 1,
         'silent': 1
     }
     dtrain = xgb.DMatrix(X_train, label=y_train)
@@ -63,6 +62,8 @@ for train_index, val_index in kf.split(training):
     # 对测试集进行预测（以上部分之所以划分成验证集，可以用来调参）
     y_pred = model.predict(dval, ntree_limit=model.best_ntree_limit)
     rmse = mean_squared_error(y_val, y_pred) ** 0.5
+    MSE = sum(abs(y_val - y_pred)) / len(y_val)
     print("rmse:", rmse)
+    print("MSE:",MSE)
     rmse_list.append(rmse)
 
