@@ -10,11 +10,19 @@ import os
 import math
 from util import *
 
+<<<<<<< HEAD
 t_click_file = 't_click.csv'
 t_loan_sum_file = 't_loan_sum.csv'
 t_loan_file = 't_loan.csv'
 t_order_file = 't_order.csv'
 t_user_file = 't_user.csv'
+=======
+t_click_file = '../t_click.csv'
+t_loan_sum_file = '../t_loan_sum.csv'
+t_loan_file = '../t_loan.csv'
+t_order_file = '../t_order.csv'
+t_user_file = '../t_user.csv'
+>>>>>>> 2b59f0423a46f4c77ed64cd213f88dd8c47ef23d
 
 if  not os.path.exists('tmp'):
     os.mkdir('tmp')
@@ -115,9 +123,15 @@ def gen_loan_feat():
         
         df_limit = gen_user_feat()[['uid','limit']]
         exceed_df = pd.merge(exceed_df,df_limit,how='left',on='uid')
+<<<<<<< HEAD
         exceed_df['exceed_loan_1'] = exceed_df[9] - exceed_df['limit']
         exceed_df['exceed_loan_2'] = exceed_df[10] - exceed_df['limit']
         exceed_df['exceed_loan_3'] = exceed_df[11] - exceed_df['limit']
+=======
+        exceed_df['exceed_loan_1'] = exceed_df[8] - exceed_df['limit']
+        exceed_df['exceed_loan_2'] = exceed_df[9] - exceed_df['limit']
+        exceed_df['exceed_loan_3'] = exceed_df[10] - exceed_df['limit']
+>>>>>>> 2b59f0423a46f4c77ed64cd213f88dd8c47ef23d
         print("exceed_df表的行列数：",exceed_df.values.shape)
 
         # 更新limit,如果某次贷款的额度超过了该用户的初始贷款额度，那么说明该用户的额度已经提高了，且提高的额度至少到该次贷款的金额
